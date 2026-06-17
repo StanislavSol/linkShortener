@@ -12,7 +12,7 @@
 ## Локальная установка проекта
 
 ```shell
-git@github.com:StanislavSol/linkShortener.git
+git clone git@github.com:StanislavSol/linkShortener.git
 cd linkShortener
 make install
 ```
