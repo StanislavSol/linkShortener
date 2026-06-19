@@ -5,7 +5,6 @@ RUN apt-get update && apt-get install -y \
     libzip-dev \
     libsqlite3-dev \
     unzip \
-    nginx \
     && docker-php-ext-install pdo pdo_pgsql pdo_sqlite zip \
     && rm -rf /var/lib/apt/lists/*
 
@@ -28,9 +27,6 @@ RUN php artisan config:cache && \
     php artisan route:cache && \
     php artisan view:cache
 
-RUN rm -rf /etc/nginx/sites-enabled/default
-COPY nginx.conf /etc/nginx/sites-enabled/default
-
 EXPOSE 10000
 
-CMD ["sh", "-c", "nginx -g 'daemon off;' & php artisan serve --host=0.0.0.0 --port=10000"]
+CMD php artisan serve --host=0.0.0.0 --port=10000
