@@ -19,11 +19,9 @@ WORKDIR /app
 COPY . .
 
 RUN composer install --no-dev --optimize-autoloader
-
 RUN npm ci && npm run build
 
-RUN mkdir -p storage/logs storage/framework storage/app && \
-    mkdir -p /var/log/supervisor && \
+RUN mkdir -p storage/logs storage/framework storage/app /var/log/supervisor && \
     chown -R www-data:www-data storage bootstrap/cache /var/log/supervisor && \
     chmod -R 775 storage bootstrap/cache /var/log/supervisor
 
