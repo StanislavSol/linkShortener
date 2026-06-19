@@ -29,11 +29,8 @@ RUN php artisan config:cache && \
     php artisan route:cache && \
     php artisan view:cache
 
-RUN rm -rf /etc/nginx/sites-enabled/default
-COPY docker/nginx.conf /etc/nginx/sites-available/link-shortener
-RUN ln -s /etc/nginx/sites-available/link-shortener /etc/nginx/sites-enabled/link-shortener
-
-COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY nginx.conf /etc/nginx/sites-enabled/default
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 EXPOSE 10000
 
