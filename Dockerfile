@@ -29,7 +29,24 @@ RUN php artisan config:cache && \
     php artisan route:cache && \
     php artisan view:cache
 
-COPY nginx.conf /etc/nginx/sites-enabled/default
+# Создаем конфиг для PHP-FPM
+RUN echo "listen = 127.0.0.1:9000" > /usr/local/etc/php-fpm.d/zz-docker.conf && \
+    echo "listen.owner = www-data" >> /usr/local/etc/php-fpm.d/zz-docker.conf && \
+    echo "listen.group = www-data" >> /usr/local/etc/php-fpm.d/zz-docker.conf && \
+    echo "listen.mode = 0660" >> /usr/local/etc/php-fpm.d/zz-docker.conf && \
+    echo "user = www-data" >> /usr/local/etc/php-fpm.d/zz-docker.conf && \
+    echo "group = www-data" >> /usr/local/etc/php-fpm.d/zz-docker.conf && \
+    echo "pm = dynamic" >> /usr/local/etc/php-fpm.d/zz-docker.conf && \
+    echo "pm.max_children = 5" >> /usr/local/etc/php-fpm.d/zz-docker.conf && \
+    echo "pm.start_servers = 2" >> /usr/local/etc/php-fpm.d/zz-docker.conf && \
+    echo "pm.min_spare_servers = 1" >> /usr/local/etc/php-fpm.d/zz-docker.conf && \
+    echo "pm.max_spare_servers = 3" >> /usr/local/etc/php-fpm.d/zz-docker.conf && \
+    echo "clear_env = no" >> /usr/local/etc/php-fpm.d/zz-docker.conf
+
+RUN rm -rf /etc/nginx/sites-enabled/default
+COPY nginx.conf /etc/nginx/sites-available/laravel
+RUN ln -s /etc/nginx/sites-available/laravel /etc/nginx/sites-enabled/laravel
+
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 EXPOSE 10000
