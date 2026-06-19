@@ -39,4 +39,4 @@ COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 EXPOSE 10000
 
-CMD ["sh", "-c", "nginx -g 'daemon off;' & php-fpm8.3 -F"]
+CMD ["sh", "-c", "nginx -g 'daemon off;' & php-fpm -F"]
