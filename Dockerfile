@@ -21,8 +21,11 @@ RUN npm install && npm run build
 RUN chown -R www-data:www-data /app/storage /app/bootstrap/cache
 RUN chmod -R 775 /app/storage /app/bootstrap/cache
 
+# Копируем .env.example в .env если .env не существует
+RUN if [ ! -f .env ]; then cp .env.example .env; fi
+
 EXPOSE 10000
 
-CMD php artisan migrate --force && \
-    php artisan key:generate --force && \
+CMD php artisan key:generate --force && \
+    php artisan migrate --force && \
     php artisan serve --host=0.0.0.0 --port=10000
