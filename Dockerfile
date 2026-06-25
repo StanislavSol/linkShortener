@@ -1,46 +1,25 @@
-FROM php:8.3-apache
+FROM php:8.4-cli
 
-# Устанавливаем ТОЛЬКО необходимые пакеты
 RUN apt-get update && apt-get install -y \
     libpq-dev \
-    libzip-dev \
-    libsqlite3-dev \
-    unzip \
-    git \
-    curl \
-    && docker-php-ext-install pdo pdo_pgsql pdo_sqlite zip \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    libzip-dev
+RUN docker-php-ext-install pdo pdo_pgsql zip
+# RUN docker-php-ext-configure pdo pdo_pgsql
 
-# Включаем mod_rewrite для Laravel
-RUN a2enmod rewrite
+RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
+    && php composer-setup.php --install-dir=/usr/local/bin --filename=composer \
+    && php -r "unlink('composer-setup.php');"
 
-# Устанавливаем Composer
-COPY --from=composer:2.6 /usr/bin/composer /usr/bin/composer
+RUN curl -sL https://deb.nodesource.com/setup_24.x | bash -
+RUN apt-get install -y nodejs
 
 WORKDIR /app
+
 COPY . .
+RUN composer install
+RUN npm ci
+RUN npm run build
 
-# Права на папки Laravel
-RUN chown -R www-data:www-data /app/storage /app/bootstrap/cache
-RUN chmod -R 775 /app/storage /app/bootstrap/cache
+RUN > database/database.sqlite
 
-# Установка PHP зависимостей
-RUN composer install --no-dev --optimize-autoloader
-
-# Создаем .env если нет
-RUN if [ ! -f .env ]; then cp .env.example .env; fi
-
-# Настраиваем Apache на папку public
-RUN rm -rf /var/www/html && \
-    ln -s /app/public /var/www/html
-
-# Настройка Apache
-RUN echo 'ServerName localhost' >> /etc/apache2/apache2.conf && \
-    sed -i 's/AllowOverride None/AllowOverride All/g' /etc/apache2/apache2.conf
-
-EXPOSE 80
-
-CMD php artisan key:generate --force && \
-    php artisan migrate --force && \
-    apache2-foreground
+CMD ["bash", "-c", "php artisan migrate:refresh --seed --force && php artisan serve --host=0.0.0.0 --port=$PORT"]
