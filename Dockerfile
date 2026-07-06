@@ -16,7 +16,7 @@ RUN apt-get install -y nodejs
 WORKDIR /app
 
 COPY . .
-RUN composer install --no-dev --ignore-platform-reqs
+RUN composer install --ignore-platform-reqs
 RUN npm ci
 RUN npm run build
 
